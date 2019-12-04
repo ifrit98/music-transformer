@@ -1,0 +1,135 @@
+<html>
+<head>
+<title>MIDI Randomizer</title>
+<style>
+h1,h2,a
+{
+font-family:sans-serif;
+}
+</style>
+</head>
+<body>
+<h1>MIDI Randomizer</h1>
+<a href="images/screen_full.png"><img src="images/screen_small.png"><br><small>View Screenshot</small></a>
+<p>
+<big><b><a href="https://sourceforge.net/project/showfiles.php?group_id=264371&package_id=325024">Download now</a></b></big><br>
+<p>
+<h2>
+About
+</h2>
+MIDI Randomizer is a Java Swing application written by Nate Roe that generates MIDI files (SMF) and .pat files (for use with AudioRealism's BassLine synth) according to a set of randomization parameters. This allows some measure of control over the randomizer.
+<p>
+<h2>Instructions</h2>
+To run, double-click the MidiRandomizer.jar file or issue the command:
+<pre>
+java -jar MidiRandomizer.jar
+</pre>
+The sequence of notes stored in a MIDI or .pat file is called a "pattern". Press the "Randomize" button to generate random pattern files in the chosen directory.
+<p>
+Randomization parameters are automatically stored on exit and loaded on startup. They are located in the same directory as the JAR file in "default.prm". To restore defaults, delete this file. You can also use the file menu to load and store as many parameters sets as you need.
+<h2>
+Pitch Weight
+</h2>
+Each pitch in the scale is assigned a weight. When the randomizer chooses a note to be played, it chooses that note's pitch randomly from those pitches whose weights are non-zero. The likelihood of any given pitch being chosen is the weight of that pitch divided by the weight of the sum of the weights of all other pitches.
+<p>
+By default, any pitch in C-Major is equally likely (all weighted at 100), while pitches outside of C-Major will never be chosen (weighted at 0).
+<h2>
+Rhythm
+</h2>
+Each step in the pattern has a likelihood of sounding (note on). A step can be guaranteed to sound (100% likely) or silenced (0%).
+<p>
+By default, each step is 100% likely to sound.
+<h2>
+Slide
+</h2>
+Most monophonic (single-voiced) synthesizers glide from pitch to pitch if more than one note is held at once. The Slide parameters govern the likelihood of this occurring for any given step (the previous note slides into this one.) A step can be guaranteed to slide (100% likely) or guaranteed not to slide (0%).
+<p>
+By default, each step is 50% likely to slide.
+<h2>
+Octave Weight
+</h2>
+Each octave is assigned a weight. When the randomizer chooses a note to be played, it chooses that note's octave randomly from those octaves whose weights are non-zero. The likelihood of any given octave being chosen is the weight of that octave divided by the weight of the sum of the weights of all other octaves.
+<p>
+By default, octave 5 is the only weighted octave. Middle C is the lowest note in octave 5. Octaves span from C to B.
+<h2>
+Root Note
+</h2>
+The root note controls the octave chosen for a given pitch. Notes lower than the designated root note will be played in the next highest octave.
+<p>
+For example, if you were to desire a random arpeggiation of Em7, you would weight the pitches E, G, B, and D evenly, with other pitches at 0. If only one octave were weighted (the default) and the root note were C (the default), then any D played would be lower than E which is actually the root note of the chord. By setting the root note to E, the chord voicing will no longer be inverted and any D played will sound an octave higher.
+<h2>
+Accent By Pitch
+</h2>
+An accent is a note played with stronger than usual velocity. By default, normal notes are played at velocity 75, while accented notes are played at velocity 127.
+<p>
+Accents may be chosen by pitch or by rhythm. By default, accents are chosen by pitch.
+<p>
+When accents are chosen by pitch, each pitch has a likelihood. When the randomizer plays a note, it will use the accent likelihood of the note's pitch to determine whether to accent that note. A pitch can be guaranteed to have an accent (100% likely) or guaranteed to not (0%).
+<p>
+By default, all pitches of C-Major are 25% likely to accent.
+<h2>
+Accent By Rhythm
+</h2>
+Accents may be chosen by pitch or by rhythm. By default, accents are chosen by pitch.
+<p>
+When accents are chosen by rhythm, each step has a likelihood. When the randomizer plays a note, it will use the accent likelihood of the note's step to determine whether to accent that note. A step can be guaranteed to have an accent (100% likely) or guaranteed to not (0%).
+<p>
+By default, each step is 25% likely to accent.
+<h2>
+Quantize
+</h2>
+This determines the size of each step in the sequence. Each successive step will sound after the quantize time has elapsed.
+<p>
+By default, the quantization is 16th notes. Since there are 16 steps in a pattern, the pattern is one whole note long (one bar in 4/4). If the quantization were 8th notes, then the pattern would be two whole notes long (two bars in 4/4).
+<h2>
+Quantize Length
+</h2>
+Each note that sounds, if it does not slide, is given this length. This can be used to make notes very staccato by setting the quantize length very short (32nd or 64th notes).
+<p>
+If the quantize length is longer than the quantize setting, unintentional slides may occur.
+<p>
+By default, the quantization length is 32nd notes.
+<p>
+<h2>
+Pattern Length
+</h2>
+The number of steps in the pattern can be set here, from one step to two hundred and fifty-six. After you've chosen the desired number of steps, use the "Set Length" button to commit your change.
+<p>
+By default, the pattern length is sixteen steps.
+<h2>
+Output Path
+</h2>
+Browse to select the directory where the generated .pat and/or .mid files will be created.
+<p>
+By default, this is the current directory.
+<h2>
+.mid and/or .pat
+</h2>
+Use these checkboxes to select the output file type(s) you require.
+<p>
+By default, both file types are created.
+<h2>
+Number of Patterns
+</h2>
+Enter the number of patterns to create when "Randomize" is clicked, from one to one hundred.
+<p>
+By default, ten patterns are generated.
+<hr>
+<small>
+&copy; Copyright 2009 by Nathaniel Roe.
+<p>
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+<p>
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+<p>
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.
+</small>
+</body>
+</html>

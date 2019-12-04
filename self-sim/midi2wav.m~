@@ -1,0 +1,11 @@
+midi = readmidi('jb.mid');
+
+[x, fs] = midi2audio(midi);
+
+% Paramaterize midi read
+y = midi2audio(midi, 16000, 'sine');
+
+% Normalize and write to file
+y = .95.*y./max(abs(y));
+audiowrite(y, fs, 'jb.wav');
+

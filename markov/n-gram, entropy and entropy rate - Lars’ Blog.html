@@ -1,0 +1,930 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.15.1 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>n-gram, entropy and entropy rate - Lars’ Blog</title>
+<meta name="description" content="n-gram models find use in many areas of computer science, but are often only explained in the context of natural language processing (NLP). In this post, I will show the relation to information theory by explicitly calculating the entropy and entropy rate of unigrams, bigrams and general -grams.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Lars' Blog">
+<meta property="og:title" content="n-gram, entropy and entropy rate">
+<meta property="og:url" content="https://lars76.github.io/nlp/n-gram-entropy/">
+
+
+  <meta property="og:description" content="n-gram models find use in many areas of computer science, but are often only explained in the context of natural language processing (NLP). In this post, I will show the relation to information theory by explicitly calculating the entropy and entropy rate of unigrams, bigrams and general -grams.">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2018-08-09T21:00:00+00:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://lars76.github.io/nlp/n-gram-entropy/">
+
+
+
+
+
+
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Lars Nieradzik",
+      "url": "https://lars76.github.io",
+      "sameAs": null
+    }
+  </script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Lars' Blog Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+
+<!--[if IE ]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <script type="text/x-mathjax-config"> MathJax.Hub.Config({ TeX: { equationNumbers: { autoNumber: "AMS" } } }); </script>
+<script type="text/x-mathjax-config">
+	MathJax.Hub.Config({
+		tex2jax: {
+			inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+			processEscapes: true
+		}
+	});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML" type="text/javascript"></script>
+  </head>
+
+  <body class="layout--single">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">Lars' Blog</a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/categories/" >Posts by Category</a>
+            </li></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+
+      
+        <img src="/assets/images/bio-photo.jpg" alt="Lars Nieradzik" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Lars Nieradzik</h3>
+    
+    
+      <p class="author__bio" itemprop="description">
+        Machine learning and language enthusiast
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">Bremen, Germany</span>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:l.nieradzik@gmail.com">
+            <meta itemprop="email" content="l.nieradzik@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/lars-nieradzik" itemprop="sameAs" rel="nofollow noopener noreferrer">
+            <i class="fab fa-fw fa-linkedin" aria-hidden="true"></i> LinkedIn
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/lars76" itemprop="sameAs" rel="nofollow noopener noreferrer">
+            <i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="n-gram, entropy and entropy rate">
+    <meta itemprop="description" content="n-gram models find use in many areas of computer science, but are often only explained in the context of natural language processing (NLP). In this post, I will show the relation to information theory by explicitly calculating the entropy and entropy rate of unigrams, bigrams and general -grams.">
+    <meta itemprop="datePublished" content="August 09, 2018">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">n-gram, entropy and entropy rate
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  5 minute read
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>n-gram models find use in many areas of computer science, but are often only explained in the context of natural language processing (NLP). In this post, I will show the relation to information theory by explicitly calculating the entropy and entropy rate of unigrams, bigrams and general <script type="math/tex">n</script>-grams.</p>
+
+<h2 id="overview">Overview</h2>
+
+<p><script type="math/tex">n</script>-grams split texts into contiguous sequences of <script type="math/tex">n</script> words or letters and assign a probability to each sequence. When <script type="math/tex">n \geq 2</script>, we obtain Markov models of order <script type="math/tex">n-1</script>.</p>
+
+<p>In NLP, <script type="math/tex">n</script>-grams are used to predict the next letter/word based on the previous <script type="math/tex">n-1</script> letters/words. More formally, we can write</p>
+
+<script type="math/tex; mode=display">p_{X_n \mid X_{n-1}, \dots, X_{1}}(\mathbf{x} ; \boldsymbol{\theta}) = \prod_{i=1}^n \theta_i^{x_i}</script>
+
+<p>where each <script type="math/tex">X_i</script> indicates a letter, <script type="math/tex">\boldsymbol{\theta}</script> is a fixed parameter and <script type="math/tex">\mathbf{x} \in \{0, 1\}^k</script>. In practice, <script type="math/tex">\boldsymbol{\theta}</script> is not known and has to be estimated. We will use here the maximum likelihood estimate, which is simply <script type="math/tex">\frac{\text{frequency letter}}{\text{all letters}}</script>.</p>
+
+<p><strong>Example:</strong> Let the text be “abac”. Given that the last letter was “a”, what is the probability that the next letter is “b”?</p>
+
+<p>The parameter is <script type="math/tex">% <![CDATA[
+\boldsymbol{\theta}_a = \begin{bmatrix}\frac{1}{2} & \frac{1}{2}\end{bmatrix}^T %]]></script> and the input is <script type="math/tex">% <![CDATA[
+\mathbf{x} = \begin{bmatrix}1 & 0\end{bmatrix}^T %]]></script>.</p>
+
+<p>Then the probability is <script type="math/tex">p_{X_2 \mid X_{1}}(\mathbf{x} ; \boldsymbol{\theta}_a) = \left(\frac{1}{2}\right)^{1} \cdot \left(\frac{1}{2}\right)^0 = \frac{1}{2}</script>.</p>
+
+<p>This formal notation based on the categorical distribution can get a bit cumbersome. From now on, I will write the input to the PMFs simply as letters e.g. <script type="math/tex">p_{X_2 \mid X_{1}}(b \mid a) = \frac{1}{2}</script>.</p>
+
+<h2 id="unigram">Unigram</h2>
+
+<h3 id="unigram-1">Unigram</h3>
+
+<p>Unigrams (also called <script type="math/tex">1</script>-grams or bag-of-words models) are a special case of <script type="math/tex">n</script>-grams where each sequence consists of a single word or letter. Unigrams depend only on the current letter.</p>
+
+<p>A unigram does the following approximation:</p>
+
+<script type="math/tex; mode=display">p_{X_n \mid X_{n-1}, \dots, X_{1}}(x_n \mid x_{n-1}, \dots, x_1) \approx p_{X_{n}}(x_n)</script>
+
+<p>Hence, it is assumed that <script type="math/tex">X_1, \dots, X_n</script> are all i.i.d random variables.</p>
+
+<p><strong>Example:</strong> umulmundumulmum$</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Letter</th>
+      <th>Frequency</th>
+      <th>Probability</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>u</td>
+      <td>6</td>
+      <td>6/16</td>
+    </tr>
+    <tr>
+      <td>m</td>
+      <td>5</td>
+      <td>5/16</td>
+    </tr>
+    <tr>
+      <td>l</td>
+      <td>2</td>
+      <td>2/16</td>
+    </tr>
+    <tr>
+      <td>n</td>
+      <td>1</td>
+      <td>1/16</td>
+    </tr>
+    <tr>
+      <td>d</td>
+      <td>1</td>
+      <td>1/16</td>
+    </tr>
+    <tr>
+      <td>$</td>
+      <td>1</td>
+      <td>1/16</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>In the example, we calculated the probability by dividing the frequency of a single letter by the length of the text.</p>
+
+<p>The unigrams can be used to calculate the probability of certain letters occurring:</p>
+
+<script type="math/tex; mode=display">p_{X_{16} \mid X_{15}, \dots, X_1}($ \mid m, \dots, u) = p_{X_{16}}($) = \frac{1}{16}</script>
+
+<script type="math/tex; mode=display">p_{X_{5} \mid X_{4}, \dots, X_1}(m \mid l, \dots, u) = p_{X_{5}}(m) = \frac{5}{16}</script>
+
+<p>Note that i.i.d implies stationarity.</p>
+
+<h3 id="entropy">Entropy</h3>
+
+<p>The most common definition of entropy is the following:</p>
+
+<script type="math/tex; mode=display">H(X) = \mathbf{E}[-\log_2(p_{X}(x))]</script>
+
+<p>For example, the entropy of the word “umulmundumulmum$” is:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{split}
+H(X_{16} \mid X_{15}, \dots, X_1) &= H(X_{16})\\
+&= -\sum_{x} p_{X_{16}}(x)\log_2(p_{X_{16}}(x))\\
+&= -\left(\frac{6}{16}\log_2\left(\frac{6}{16}\right) + \frac{5}{16}\log_2\left(\frac{5}{16}\right) + \frac{2}{16}\log_2\left(\frac{2}{16}\right) + \frac{3}{16}\log_2\left(\frac{1}{16}\right)\right)\\
+&\approx 2.18
+\end{split} %]]></script>
+
+<p>In data compression, there exists another definition called <script type="math/tex">0</script>-th order empirical entropy:</p>
+
+<script type="math/tex; mode=display">H_0(T) = \sum_{c\in \Sigma} \frac{n_c}{n}\log_2\left(\frac{n}{n_c}\right)</script>
+
+<p>Empirical entropy makes no direct probabilistic assumptions and requires a text-like structure (i.e. where frequency estimates make sense). <script type="math/tex">H(X)</script> is in comparison more general and one needs to specify the probability distribution.</p>
+
+<p>In our example, the variables for <script type="math/tex">H_0(T)</script> are:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{split}
+T &= \text{umulmundumulmum\$}\\
+\Sigma &= \{u, m, l, n, d, \$\}\\
+n &= \lvert T\rvert = 16\\
+n_c &= \text{frequency of c}
+\end{split} %]]></script>
+
+<p>Both definitions give the same result.</p>
+
+<h3 id="entropy-rate">Entropy rate</h3>
+
+<p>For a unigram, the entropy rate is defined as follows:</p>
+
+<script type="math/tex; mode=display">\lim_{n\to\infty} \frac{1}{n} H(X_1, \dots, X_n) = \lim_{n\to\infty} \frac{n}{n} H(X_1) = H(X_1)</script>
+
+<p>Since <script type="math/tex">X_1, \dots, X_n</script> are i.i.d random variables, it suffices to calculate the entropy of one <script type="math/tex">X_i</script>.</p>
+
+<p>The same is true for our example. We can simply calculate one of the random variables i.e. <script type="math/tex">H(X_{16}) = \cdots = H(X_1)</script>.</p>
+
+<h2 id="bigram">Bigram</h2>
+
+<h3 id="bigram-1">Bigram</h3>
+
+<p>In this section, we will look at bigrams, which are <script type="math/tex">n</script>-grams with <script type="math/tex">n=2</script>. Bigrams depend on the previous letter.</p>
+
+<p>A bigram does the following approximation:</p>
+
+<script type="math/tex; mode=display">p_{X_n \mid X_{n-1}, \dots, X_{1}}(x_n \mid x_{n-1}, \dots, x_1) \approx p_{X_{n} \mid X_{n-1}}(x_n \mid x_{n-1})</script>
+
+<p>Hence, bigrams satisfy the Markov property. We previously assumed i.i.d random variables. Now, we need stationarity (also known as time-homogeneity in the context of Markov chains):</p>
+
+<script type="math/tex; mode=display">p_{X_{n+1} \mid X_{n}}(x_{n+1} \mid x_{n}) = p_{X_{n} \mid X_{n-1}}(x_{n} \mid x_{n-1})</script>
+
+<p><strong>Example:</strong> umulmundumulmum$</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Letters</th>
+      <th>Frequency</th>
+      <th>Conditional probability</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>mu</td>
+      <td>4</td>
+      <td>4/5</td>
+    </tr>
+    <tr>
+      <td>um</td>
+      <td>3</td>
+      <td>3/6</td>
+    </tr>
+    <tr>
+      <td>ul</td>
+      <td>2</td>
+      <td>2/6</td>
+    </tr>
+    <tr>
+      <td>lm</td>
+      <td>2</td>
+      <td>2/2</td>
+    </tr>
+    <tr>
+      <td>un</td>
+      <td>1</td>
+      <td>1/6</td>
+    </tr>
+    <tr>
+      <td>nd</td>
+      <td>1</td>
+      <td>1/1</td>
+    </tr>
+    <tr>
+      <td>du</td>
+      <td>1</td>
+      <td>1/1</td>
+    </tr>
+    <tr>
+      <td>m$</td>
+      <td>1</td>
+      <td>1/5</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>In the example, the frequency was calculated by generating all possible contiguous sequences of two in the text. All sequences with the same initial letter in the table (e.g. “m” of “mu”) form a probability distribution.</p>
+
+<p>Let us calculate the probabilities of some letters:</p>
+
+<script type="math/tex; mode=display">p_{X_{16} \mid X_{15}, \dots, X_1}($ \mid m, \dots, u) = p_{X_{16} \mid X_{15}}($ \mid m) = \frac{1}{5}</script>
+
+<script type="math/tex; mode=display">p_{X_{5} \mid X_{4}, \dots, X_1}(m \mid l, \dots, u) = p_{X_{5} \mid X_4}(m \mid l) = \frac{2}{2}</script>
+
+<p>Compare this with the i.i.d assumption from the unigram. By using bigrams, we can take into account the context in which the letter occurs. As a result, unigrams and bigrams have different probabilities.</p>
+
+<p>Since we satisfy the Markov property, it is easy to visualize the bigrams. Let us draw the Markov chain of the underlying stochastic process.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="n">nx</span>
+<span class="kn">import</span> <span class="nn">pydot</span>
+
+<span class="n">edges</span> <span class="o">=</span> <span class="p">[(</span><span class="s">"N"</span><span class="p">,</span> <span class="s">"D"</span><span class="p">,</span> <span class="s">"1"</span><span class="p">),(</span><span class="s">"D"</span><span class="p">,</span> <span class="s">"U"</span><span class="p">,</span> <span class="s">"1"</span><span class="p">),(</span><span class="s">"U"</span><span class="p">,</span> <span class="s">"L"</span><span class="p">,</span> <span class="s">"2/6"</span><span class="p">),</span> <span class="p">(</span><span class="s">"L"</span><span class="p">,</span> <span class="s">"M"</span><span class="p">,</span> <span class="s">"1"</span><span class="p">),</span>  <span class="p">(</span><span class="s">"M"</span><span class="p">,</span> <span class="s">"$"</span><span class="p">,</span> <span class="s">"1/5"</span><span class="p">),</span>  <span class="p">(</span><span class="s">"M"</span><span class="p">,</span> <span class="s">"U"</span><span class="p">,</span> <span class="s">"4/5"</span><span class="p">),</span>  <span class="p">(</span><span class="s">"U"</span><span class="p">,</span> <span class="s">"M"</span><span class="p">,</span> <span class="s">"3/6"</span><span class="p">),</span> <span class="p">(</span><span class="s">"U"</span><span class="p">,</span> <span class="s">"N"</span><span class="p">,</span> <span class="s">"1/6"</span><span class="p">)]</span>
+
+<span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+    <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+
+<span class="n">nx</span><span class="o">.</span><span class="n">drawing</span><span class="o">.</span><span class="n">nx_pydot</span><span class="o">.</span><span class="n">write_dot</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="s">"mc.dot"</span><span class="p">)</span>
+
+<span class="p">(</span><span class="n">graph</span><span class="p">,)</span> <span class="o">=</span> <span class="n">pydot</span><span class="o">.</span><span class="n">graph_from_dot_file</span><span class="p">(</span><span class="s">"mc.dot"</span><span class="p">)</span>
+
+<span class="n">graph</span><span class="o">.</span><span class="n">write_png</span><span class="p">(</span><span class="s">"mc.png"</span><span class="p">)</span></code></pre></figure>
+
+<p>The code will output the following graph:</p>
+
+<p><img src="https://lars76.github.io/assets/images/mc.png" alt="Markov chain" /></p>
+
+<p>When a Markov chain is time-homogeneous, irreducible and aperiodic, there exists a <em>unique</em> stationary distribution <script type="math/tex">\boldsymbol{\pi}</script>. The chain in the graph is aperiodic, because we satisfy <script type="math/tex">\text{gcd}(2, 3) = 1</script>. However, it is not yet irreducible. By adding a transition from “$” to “U”, we can also make it irreducible.</p>
+
+<h3 id="entropy-1">Entropy</h3>
+
+<p>The <script type="math/tex">1</script>-th order entropy can be defined as follows:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{split}
+H(Y \mid X) &= -\sum_{x} p_{X}(x)\sum_{y} p_{Y \mid X}(y \mid x) \log_2\left(p_{Y \mid X}(y \mid x)\right)\\
+&= -\sum_{x}\sum_{y} p_{X, Y}(x, y)\log_2\left(p_{Y \mid X}(y \mid x)\right)
+\end{split} %]]></script>
+
+<p>We can apply this formula on our example:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{split}
+H(X_{16} \mid X_{15}, \dots, X_1) &= H(X_{16} \mid X_{15})\\
+&= -(\frac{6}{16}\left(\frac{3}{6}\log_2\left(\frac{3}{6}\right) + \frac{2}{6} \log_2\left(\frac{2}{6}\right) + \frac{1}{6}\log_2\left(\frac{1}{6}\right)\right)\\
+&+ \frac{5}{16}\left(\frac{4}{5}\log_2\left(\frac{4}{5}\right) + \frac{1}{5}\log_2\left(\frac{1}{5}\right)\right)) \approx 0.7728
+\end{split} %]]></script>
+
+<p>In data compression, the following definition is more common:</p>
+
+<script type="math/tex; mode=display">H_1(T) = \frac{1}{n} \sum_{w \in \Sigma} \lvert T_w\rvert H_0(T_w)</script>
+
+<p>For example, when <script type="math/tex">w = u</script>:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{split}
+T_u &= \{um, um, um, ul, ul, un\}\\
+\lvert T_u\rvert &= 6\\
+H_0(T_u) &= \sum_{c\in T_u} \frac{n_c}{6} \log_2\left(\frac{6}{n_c}\right)\\
+n &= \lvert T\rvert = 16
+\end{split} %]]></script>
+
+<p>Again both definitions give the same result.</p>
+
+<h3 id="entropy-rate-1">Entropy rate</h3>
+
+<p>The entropy rate of a bigram is:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{split}
+\lim_{n\to\infty} H(X_n \mid X_{n-1}, \dots, X_1) &= \lim_{n\to\infty} H(X_n \mid X_{n-1})\\
+&= H(X_2 \mid X_{1})\\
+&= -\sum_{i}\pi_i\sum_{j}\mathbf{P}_{ij}\log_2(\mathbf{P}_{ij})
+\end{split} %]]></script>
+
+<p>where <script type="math/tex">\mathbf{P}</script> is the transition matrix of the time-homogeneous Markov chain and <script type="math/tex">\boldsymbol{\pi}</script> is the corresponding stationary distribution.</p>
+
+<p>Since the stochastic process is a Markov chain, the entropy rate is again just the entropy. In the example, <script type="math/tex">H(X_2 \mid X_{1}) \approx 0.7728</script>.</p>
+
+<p>To verify this result, let us add the transition <script type="math/tex">($, U, 1)</script> to our Markov chain. Now, <script type="math/tex">\boldsymbol{\pi}</script> can be calculated:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">1</span><span class="o">/</span><span class="mi">6</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="o">/</span><span class="mi">6</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">6</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">5</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]])</span>
+
+<span class="n">val</span><span class="p">,</span> <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">vec</span><span class="p">[:,</span><span class="n">val</span><span class="o">.</span><span class="n">argmax</span><span class="p">()]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">vec</span><span class="p">)))</span></code></pre></figure>
+
+<p>The code calculates the left eigenvectors and chooses the one with the  highest eigenvalue as <script type="math/tex">\boldsymbol{\pi}</script>. This highest eigenvalue will be <script type="math/tex">1,</script> because the matrix <script type="math/tex">\mathbf{P}</script> is stochastic.</p>
+
+<p>We obtain</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\boldsymbol{\pi} = \begin{bmatrix}0.0625 & 0.0625 & 0.375 & 0.125& 0.3125 &  0.0625\end{bmatrix}^T. %]]></script>
+
+<p>Note that <script type="math/tex">0.375 = \frac{6}{16}</script> and <script type="math/tex">0.3125 = \frac{5}{16}</script>. Compare these values with our previous entropy calculation. Hence, we found the same result.</p>
+
+<h2 id="n-gram">n-gram</h2>
+
+<h3 id="n-gram-1">n-gram</h3>
+
+<p>Before we only considered the case of <script type="math/tex">n</script>-grams with <script type="math/tex">n = 1</script> or <script type="math/tex">n = 2</script>, but <script type="math/tex">n</script> can be any number:</p>
+
+<script type="math/tex; mode=display">p_{X_n \mid X_{n-1}, \dots, X_{1}}(x_n \mid x_{n-1}, \dots, x_1) \approx p_{X_n \mid X_{n-1}, \dots, X_{i}}(x_n \mid x_{n-1}, \dots, x_i)</script>
+
+<p>For example, we can condition on <script type="math/tex">X_1, \dots, X_{15}</script> and predict the <script type="math/tex">16</script>th letter:</p>
+
+<script type="math/tex; mode=display">p_{X_{16} \mid X_{15}, \dots, X_1}(\$ \mid m, \dots, u) = 1</script>
+
+<p>The choice of <script type="math/tex">n</script> depends on many factors, but in general low values like <script type="math/tex">n = 2</script>, <script type="math/tex">n = 3</script> or <script type="math/tex">n = 4</script> are more popular. When we have a vocabulary of <script type="math/tex">k</script> unique words, then there are <script type="math/tex">k^n</script> possibilities to combine these words. Hence, higher values of <script type="math/tex">n</script> require bigger corpora.</p>
+
+<h3 id="entropy-2">Entropy</h3>
+
+<p>To calculate the <script type="math/tex">n</script>-th order entropy, one simply conditions on <script type="math/tex">n-1</script> random variables:</p>
+
+<script type="math/tex; mode=display">H(X_n \mid X_{n-1}, \dots, X_1)</script>
+
+<p>The definition for data compression is similar to the previous one:</p>
+
+<script type="math/tex; mode=display">H_k(T) = \frac{1}{n} \sum_{w \in \Sigma^k} \lvert T_w\rvert H_0(T_w)</script>
+
+<p>Instead of manually calculating the <script type="math/tex">n</script>-th order entropy for all <script type="math/tex">n</script>, we can also use a suffix tree (see <a href="http://simongog.github.io/lessons/2012/08/26/Calculating_H_k_in_linear_time/">this article</a>).</p>
+
+<p>The following code constructs a compressed suffix tree by using the library <a href="https://github.com/simongog/sdsl-lite">sdsl-lite</a> and then calculates the entropy for <script type="math/tex">0 \leq n \leq 10</script>:</p>
+
+<figure class="highlight"><pre><code class="language-c--" data-lang="c++"><span class="cp">#include &lt;sdsl/suffix_trees.hpp&gt;
+</span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">sdsl</span><span class="p">;</span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+    <span class="n">cst_sct3</span><span class="o">&lt;&gt;</span> <span class="n">cst</span><span class="p">;</span>
+    <span class="n">construct_im</span><span class="p">(</span><span class="n">cst</span><span class="p">,</span> <span class="s">"umulmundumulmum"</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"H_"</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="s">" = "</span> <span class="o">&lt;&lt;</span> <span class="n">Hk</span><span class="p">(</span><span class="n">cst</span><span class="p">,</span> <span class="n">i</span><span class="p">).</span><span class="n">first</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>Compile the code with <code class="highlighter-rouge">g++ -std=c++11 -O3 -DNDEBUG -I ~/include -L ~/lib entropy.cpp -o entropy -lsdsl -ldivsufsort -ldivsufsort64</code></p>
+
+<p>We obtain as result:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{split}
+H_0 &= 2.18004\\
+H_1 &= 0.772783\\
+H_2 &= 0.54718\\
+H_3 &= H_4 = H_5 = H_6 = 0.125\\
+H_7 &= 0
+\end{split} %]]></script>
+
+<p>We can see that conditioning reduces entropy, thus <script type="math/tex">H_{k+1}(T) \leq H_k(T)</script>.</p>
+
+<h3 id="entropy-rate-2">Entropy rate</h3>
+
+<p>The entropy rate is:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{split}
+\lim_{n\to\infty} H(X_n \mid X_{n-1}, \dots, X_1) &= \lim_{n\to\infty} \frac{1}{n}H(X_1, \dots, X_n)
+\end{split} %]]></script>
+
+<p>The equality follows from stationarity.</p>
+
+<p>When <script type="math/tex">n</script> is finite, calculating the entropy rate does not make a lot of sense. We saw before for i.i.d random variables and a specific <script type="math/tex">n,</script> it is just entropy.</p>
+
+<p>However, when the stochastic process is not stationary e.g.</p>
+
+<script type="math/tex; mode=display">\lim_{n\to\infty} H(X_n \mid X_{n-1}) \neq H(X_2 \mid X_1)</script>
+
+<p>or when we take <script type="math/tex">n</script>-grams with <script type="math/tex">n\to\infty</script>. Then we can get different results (as long as the limit exists).</p>
+
+<h2 id="references">References</h2>
+
+<p>[1] T. Cover and J. Thomas, <em>Elements of Information Theory</em>. Hoboken, N.J: Wiley-Interscience, 2006.</p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/categories/#nlp" class="page__taxonomy-item" rel="tag">nlp</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2018-08-09T21:00:00+00:00">August 09, 2018</time></p>
+        
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?text=n-gram%2C+entropy+and+entropy+rate%20https%3A%2F%2Flars76.github.io%2Fnlp%2Fn-gram-entropy%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Flars76.github.io%2Fnlp%2Fn-gram-entropy%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://plus.google.com/share?url=https%3A%2F%2Flars76.github.io%2Fnlp%2Fn-gram-entropy%2F" class="btn btn--google-plus" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Google Plus"><i class="fab fa-fw fa-google-plus" aria-hidden="true"></i><span> Google+</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Flars76.github.io%2Fnlp%2Fn-gram-entropy%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/general-ml/implementing-lda/" class="pagination--pager" title="Deriving and implementing LDA
+">Previous</a>
+    
+    
+      <a href="/neural-networks/object-detection/losses-for-segmentation/" class="pagination--pager" title="Losses for Image Segmentation
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Comments</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/neural-networks/object-detection/obj-detection-from-scratch/" rel="permalink">Object detection from scratch
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  5 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">In this post, I will implement a simple object detector in Keras based on the three YOLO papers [1][2][3]. The complete code can be obtained from here.
+
+</p>
+  </article>
+</div>
+
+        
+          
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/neural-networks/closed-form/" rel="permalink">Closed-form expression for neural network
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">In this blog post, I will derive a closed-form expression for a simple feed-forward neural network.
+
+</p>
+  </article>
+</div>
+
+        
+          
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/neural-networks/object-detection/obj-detection-using-segmentation/" rel="permalink">Detecting objects using segmentation
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">To find objects in images, one normally predicts four values: two coordinates, width and height. However, it is also possible to formulate object detection a...</p>
+  </article>
+</div>
+
+        
+          
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/neural-networks/object-detection/losses-for-segmentation/" rel="permalink">Losses for Image Segmentation
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  7 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">In this post, I will implement some of the most common losses for image segmentation in Keras/TensorFlow. I will only consider the case of two classes (i.e. ...</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+    </div>
+
+    
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2019 Lars Nieradzik. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+  <script defer src="https://use.fontawesome.com/releases/v5.6.0/js/all.js" integrity="sha384-z9ZOvGHHo21RqN5De4rfJMoAxYpaVoiYhuJXPyVmSs8yn20IE3PmBM534CffwSJI" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "https://lars76.github.io/nlp/n-gram-entropy/";  // Replace PAGE_URL with your page's canonical URL variable
+      this.page.identifier = "/nlp/n-gram-entropy"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+      var d = document, s = d.createElement('script');
+      s.src = 'https://lars76.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+  </body>
+</html>
